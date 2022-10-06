@@ -29,6 +29,8 @@ uncontrolable = [
     'Wind Onshore  - Actual Aggregated [MW]'
 ]
 
+hydro_consumption = 'Hydro Pumped Storage  - Actual Consumption [MW]'
+
 countries_datafiles = glob.glob('countries/*')
 dataframes = []
 
@@ -36,8 +38,8 @@ for file in countries_datafiles:
   df = pd.read_csv(file, )
   dataframes.append(df)
 
-#num_countries = 32
-num_countries = 1
+num_countries = 32
+# num_countries = 1
 for i in range(num_countries):
     df = dataframes[i]
     countryname = str(df['Area'][0])
@@ -49,26 +51,21 @@ for i in range(num_countries):
 
     hours_in_day = 24
     days_in_year = 365
+    winter_period = 60 # first 2 months: jan, feb
 
     num_samples_in_hour = round(len(df.index) / days_in_year / hours_in_day)
     
     # this is just to test our stuff works as inteneded (on Austria df)
     # num_samples_in_hour = 1
     # hours_in_day = 96
+    # winter_period = 1
     
     print(num_samples_in_hour)
 
-    # group dataframe so that all 
+    # group dataframe so that all samples are summed per hour
     df = df.groupby(df.index // num_samples_in_hour).sum()
-
-    # I take 0, 24, 48, 72, 96 ...
-    # I take 1, 25, 49, 73, 97 ...
-    # I take 2, 26, 50, 74, 98 ...
-
     result = []
-
-    # winter_period = 60 # first 2 months: jan, feb
-    winter_period = 1
+    
     for i in range(hours_in_day):
         end = winter_period * hours_in_day + i
         # grab every 24'th row and take the mean of it
@@ -89,26 +86,28 @@ for i in range(num_countries):
     controlable_sum = 0.0
     for column in controlable:
         if column in result_df.columns:
-            controlable_sum = controlable_sum + result_df[column]
-  
+            if column == hydro_consumption:
+                controlable_sum = controlable_sum - result_df[column]
+            else:
+                controlable_sum = controlable_sum + result_df[column]
+
     uncontrolable_sum = 0.0 
     for column in uncontrolable:
         if column in result_df.columns:
             uncontrolable_sum = uncontrolable_sum + result_df[column]
 
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(7, 7))
     hours_x = np.arange(hours_in_day)
     ax.plot(hours_x, controlable_sum, label='controlable sources')
     ax.plot(hours_x, uncontrolable_sum, label='uncontrolable sources')
     ax.plot(hours_x, uncontrolable_sum + controlable_sum, label='total')
     ax.set_xbound(0, hours_in_day - 1)
-    ax.set_ybound(0)
     ax.set_xticks(np.arange(0, hours_in_day, step=1))
 
 
     savearray = np.array([hours_x,controlable_sum,uncontrolable_sum])
-    # np.save("Consumption_data/" + str(countryname)+".npy",savearray)
+    np.save("Consumption_data/" + str(countryname)+".npy",savearray)
 
     ax.set(xlabel='Time [Hours]', ylabel='Net Generation (MW)',
        title='Winter energy consumption during the day in '+ str(countryname))
