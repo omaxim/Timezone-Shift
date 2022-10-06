@@ -51,20 +51,24 @@ for i in range(num_countries):
     days_in_year = 365
 
     num_samples_in_hour = round(len(df.index) / days_in_year / hours_in_day)
+    
+    # this is just to test our stuff works as inteneded (on Austria df)
+    # num_samples_in_hour = 1
+    # hours_in_day = 96
+    
     print(num_samples_in_hour)
 
-    n = round(len(df.index) / days_in_year)
-    print(n)
-
+    # group dataframe so that all 
     df = df.groupby(df.index // num_samples_in_hour).sum()
 
     # I take 0, 24, 48, 72, 96 ...
     # I take 1, 25, 49, 73, 97 ...
-        # I take 2, 26, 50, 74, 98 ...
+    # I take 2, 26, 50, 74, 98 ...
 
     result = []
 
-    winter_period = 60 # first 2 months: jan, feb
+    # winter_period = 60 # first 2 months: jan, feb
+    winter_period = 1
     for i in range(hours_in_day):
         end = winter_period * hours_in_day + i
         # grab every 24'th row and take the mean of it
@@ -93,38 +97,21 @@ for i in range(num_countries):
             uncontrolable_sum = uncontrolable_sum + result_df[column]
 
 
-    fig, ax = plt.subplots(figsize=(18, 8))
-    hours_x = np.arange(24)
+    fig, ax = plt.subplots(figsize=(8, 8))
+    hours_x = np.arange(hours_in_day)
     ax.plot(hours_x, controlable_sum, label='controlable sources')
     ax.plot(hours_x, uncontrolable_sum, label='uncontrolable sources')
     ax.plot(hours_x, uncontrolable_sum + controlable_sum, label='total')
-    ax.set_xbound(0, 23)
+    ax.set_xbound(0, hours_in_day - 1)
     ax.set_ybound(0)
-    ax.set_xticks(np.arange(0, 24, step=1))
+    ax.set_xticks(np.arange(0, hours_in_day, step=1))
 
 
     savearray = np.array([hours_x,controlable_sum,uncontrolable_sum])
-#    np.save("Consumption_data/" + str(countryname)+".npy",savearray)
+    # np.save("Consumption_data/" + str(countryname)+".npy",savearray)
 
-    ax.set(xlabel='Day-time (h)', ylabel='Energy usage (MWh)',
+    ax.set(xlabel='Time [Hours]', ylabel='Net Generation (MW)',
        title='Winter energy consumption during the day in '+ str(countryname))
     ax.grid()
     ax.legend()
-    #plt.show()
-
-
-
-# %%
-# we want to average by the hour over the period (of winter)
-
-
-# for each column I want to add every n'th row for 60 days and then div by 60
-# n = num_rows / 365
-# granularity = n / 24
-# then we should add up n + granularity rows i.e.
-
-# for each column
-#   for row in range(0, num_rows, n)
-#     for time_step in range(granularity)
-
-
+    plt.show()
