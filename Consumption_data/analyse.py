@@ -12,8 +12,26 @@ uncontrolable_data = {country_names[i]:np.load(countries[i])[2,:] for i in range
 controlable = pd.DataFrame(controlable_data)/1000 # in GW
 uncontrolable = pd.DataFrame(uncontrolable_data)/1000 # in GW
 
-time_shift = {'MK':0, 'FR':-1, 'SE':0, 'UK':-1, 'FI':0, 'RS':0, 'AT':0, 'IT':0, 'NO':0, 'RO':0, 'DE':0, 'NL':-1, 'ME':0, 'CZ':0, 'LV':0, 'CH':0, 'PT':-1, 'BE':-1, 'IE':-1, 'SI':0, 'SK':0, 'ES':-1, 'PL':0, 'EE':0, 'LT':0, 'HR':0, 'GR':-1, 'HU':0, 'DK':0, 'BG':0, 'BA':0}
+time_shift_dict = {'MK':0, 'FR':-1, 'SE':0, 'UK':-1, 'FI':0, 'RS':0, 'AT':0, 'IT':0, 'NO':0, 'RO':0, 'DE':0, 'NL':-1, 'ME':0, 'CZ':0, 'LV':0, 'CH':0, 'PT':-1, 'BE':-1, 'IE':-1, 'SI':0, 'SK':0, 'ES':-1, 'PL':0, 'EE':0, 'LT':0, 'HR':0, 'GR':-1, 'HU':0, 'DK':0, 'BG':0, 'BA':0}
 
+print("BEFORE")
+print(controlable.head())
+print(controlable.tail())
+print()
+
+for country, time_shift in time_shift_dict.items():
+    # this if statement is kinda reduntant
+    # if country in controlable.columns:
+    controlable[country] = controlable[country].reindex(index=np.roll(controlable[country].index, time_shift))
+    controlable[country] = np.roll(controlable[country], time_shift)
+
+    uncontrolable[country] = uncontrolable[country].reindex(index=np.roll(uncontrolable[country].index, time_shift))
+    uncontrolable[country] = np.roll(uncontrolable[country], time_shift)
+
+print("AFTER")
+print(controlable.head())
+print(controlable.tail())
+print()
 #plt.plot(controlable.sum(axis=1)+uncontrolable.sum(axis=1))
 #plt.plot(controlable['AT']+uncontrolable['AT'])
 #austria = np.load('Austria (AT).npy')
