@@ -36,8 +36,8 @@ for file in countries_datafiles:
   df = pd.read_csv(file, )
   dataframes.append(df)
 
-#num_countries = 32
-num_countries = 1
+num_countries = 32
+#num_countries = 1
 for i in range(num_countries):
     df = dataframes[i]
     countryname = str(df['Area'][0])
@@ -104,13 +104,13 @@ for i in range(num_countries):
 
 
     savearray = np.array([hours_x,controlable_sum,uncontrolable_sum])
-#    np.save("Consumption_data/" + str(countryname)+".npy",savearray)
+    np.save("Consumption_data/" + str(countryname)+".npy",savearray)
 
     ax.set(xlabel='Day-time (h)', ylabel='Energy usage (MWh)',
        title='Winter energy consumption during the day in '+ str(countryname))
     ax.grid()
     ax.legend()
-    #plt.show()
+    plt.show()
 
 
 
